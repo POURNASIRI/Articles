@@ -79,3 +79,84 @@ In HTTP, Basic Authentication is an authentication scheme that allows the client
 
 ![alt text](image-2.png)
 
+# Analysis of Authentication Steps
+Client (such as a browser): Sends a request to the server for a `restricated list of data and resources.`The request may include the following fields:
+
+```js
+GET /list/ HTTP/1.1
+Host: www.site.com
+Authorization: Basic cGFzc3dvcmQ=
+```
+
+
+**Server**: Hello client, this resource is in the security zone site.com, which is a restricted resource and requires basic authentication;
+
+And return a 401 status code (Unauthorized is not authorized) to the client and provide an authentication domain `www-Authenticate: Basic realm="site.com"`to require authentication;
+
+In this case, `Basic`represents the authentication scheme, and `realm="site.com”` indicates that the client needs to enter the username and password specific to this security realm site.com, rather than credentials for other domains.
+```js
+ HTTP/1.1 401 Unauthorized
+ www-Authenticate: Basic realm= "site.com"
+ ```
+ **Client**: Server, I have already provided you with the username and password, please take a look. (Note: If the client is a browser, it will automatically prompt a dialog box for the user to enter the username and password);
+
+After entering the username and password, the client will send them to the server in Base64-encoded format.
+
+The format of the transmission is as follows:
+```js
+ GET /list/ HTTP/1.1 
+ Authorization: Basic cGFzc3dvcmQ=
+ ```
+ **Server**: Hello client, I have verified and authorized your username and password in the field, and they are correct. This is the resource you want:
+
+ ```js
+  HTTP/1.1 200 OK
+ ...
+ ```
+ #### Advantages
+
+All popular browsers support HTTP basic
+
+#### Disadvantages
+
+**Insecure**: Since it is based on HTTP transmission, it is almost like being naked on the network. Although it uses Base64 encoding, this encoding can be easily decoded. Even if the authentication content cannot be decoded into the original username and password, it is still insecure. Malicious users can obtain the authentication content and repeatedly launch requests to the server, which is known as a replay attack.
+
+**Unable to actively log out:** Since the HTTP protocol does not provide a mechanism to clear Basic authentication information from the browser, the only way to remove it is to close the tab or browser or clear the browsing history.
+#### Use cases
+Internal networks or networks with low-security requirements.
+
+
+## 2. Session Cookie Authentication
+Session-Cookie authentication is a communication authentication model between the server-side session and the browser (client-side) cookie.
+
+To fully comprehend this statement, let’s briefly discuss what a cookie is and what a session is.
+
+
+### What is a Session?
+In the context of stateless protocol communication, a session is an abstract concept that provides a mechanism to implement interruption/continuation operations during the interaction between users and servers.
+
+Specifically, a session is a structure created by the server and can be stored in various ways, such as memory, databases, or files. Large-scale websites often have dedicated session server clusters to store user session
+
+
+**Principle and process:**
+
+- **Client:** The user sends an initial request to the server.
+- **Server:** Upon receiving the request, the server automatically creates a unique session ID to identify and track the user’s current session.
+- **Client:** The browser receives the response and obtains the session information, which it includes in the next request using the session ID.
+- **Server:** The server retrieves the session ID and compares it with the locally stored session IDs to find the session associated with that specific user, allowing access to the session state.
+
+### Features:
+
+- Sessions are stored on the server. This means that the session data is not stored on the user’s computer, but rather on the server. This makes it more secure, as the session data cannot be easily tampered with.
+- Sessions utilize encryption protocols provided by the server. This further enhances the security of sessions, as the data is encrypted before it is stored on the server.
+
+
+### Differences from Cookies:
+
+- **Security:** Cookies are stored on the client side, which means that they are susceptible to tampering. Sessions, on the other hand, are stored on the server side, which makes them more secure.
+- **Type of data stored:** Cookies can only store string data, while sessions can store data of any type.
+- **Lifespan:** Cookies can be set to persist for a long time, while sessions generally have a shorter expiration time.
+- **Storage size:** Cookies have a maximum data limit of 4KB, while sessions do not have a limit.
+
+![alt text](image-3.png)
+
