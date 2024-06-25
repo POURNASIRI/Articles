@@ -238,3 +238,27 @@ Another approach is to introduce another token specifically designed for generat
 **Refresh Token:** This token is used to obtain an Access Token. It can have a longer expiration period and is associated with a separate service and strict request requirements to enhance security.
 
 Similar to sessions mentioned earlier, Refresh Tokens are not frequently validated.
+
+### Authentication flow diagram for the Refresh Token:
+
+![alt text](image-5.png)
+
+Refresh Token authentication steps analysis:
+
+1. **Client:** The client enters the username and password to request login verification.
+2. **Server:** Upon receiving the request, the server verifies the username and password. If the verification is successful, the server issues an Access Token and a Refresh Token to the client.
+3. **Client:** The client stores the Access Token and Refresh Token locally.
+4. **Client sends a request:** When requesting data, the client includes the Access Token in the request and sends it to the server.
+5. **Server:**
+- Verify that the Access Token is valid: return data normally
+- Verify that the Access Token has expired: deny the request
+6. **Client (Access Token has expired):** The client resends the Refresh Token to the server.
+7. **Server (Access Token has expired):** The server verifies the Refresh Token. If the verification is successful, the server returns a new Access Token to the client.
+8. **Client:** The client includes the new Access Token in the request and resends the request to the server.
+
+### Token and Session-Cookie Differences
+ Several distinctions between Tokens and Session Cookies make Tokens an upgraded and improved version of Session Cookies.
+
+- **Storage Locations:** Sessions are typically stored on the server, while Tokens are stateless and are usually stored on the client side.
+- **Security Levels:** Sessions and Tokens are not mutually exclusive. However, as an authentication mechanism, Tokens offer enhanced security compared to Sessions. Each request is signed, which prevents eavesdropping and replay attacks.
+- **Support Levels:** Session-Cookie authentication relies on the browser’s cookie mechanism. However, this mechanism may not function properly in native mobile apps or if the browser’s cookie storage functionality is disabled. On the other hand, Token authentication provides broader support for different client types.
