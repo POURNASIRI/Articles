@@ -160,3 +160,25 @@ Specifically, a session is a structure created by the server and can be stored i
 
 ![alt text](image-3.png)
 
+### Analysis of Session-Cookie authentication steps
+- **Client:** Send login information username/password to the server to request login verification;
+- **Server:** Verify the login information, automatically create a Session after the verification is passed (save the Session in memory, or Redis), and then generate a unique identification string session identity credential (commonly referred to as ) for this Session session_id, sid, and Set-Cookie Set this unique identifier in the response header.
+*Note: You can use the signature sid to encrypt, and the server will secret decrypt it according to the corresponding key (not a necessary step)*
+- **Client:** After receiving the response from the server, it will parse the response header and automatically sid save it in the local cookie. The browser will automatically attach the cookie information under the domain name to the request header when it makes the next HTTP request.
+- **Server:** When receiving a client request, it will parse the cookie request header, then go to the server to save the client sid according to this, and then judge whether the request is legal.
+
+### Advantages of Session-Cookie
+
+- **Easy to use:** Cookies are a straightforward mechanism for storing and managing session data. They can be easily set and retrieved using browser APIs or server-side frameworks.
+- **Backend responsibility:** The primary responsibility for session management lies with the back end, as it handles tasks such as creating, validating, and storing session data. The frontend only needs to interact with cookies to include the session ID in requests.
+- **No frontend logic:** The front end does not need to handle the complexities of session management logic, such as session expiration or revocation. This is handled by the backend.
+### Disadvantages of Session-Cookie
+
+- **Reliance on cookies:** Session management with cookies relies on the client’s support for cookies. If a user disables cookies in their browser, it can disrupt the session functionality. To address this, alternative methods like URL rewriting or storing the session ID in local storage can be used as fallback mechanisms.
+- **Insecure and vulnerable to data theft:** Cookies, if not properly secured, can be vulnerable to attacks like Cross-Site Request Forgery (CSRF). It is crucial to implement security measures such as secure cookies, CSRF tokens, and validating requests to mitigate these risks and protect against data theft.
+- **Increased server-side overhead:** Storing session data on the server side can impose additional overhead on the server, especially when managing a large number of active sessions. This can impact server performance and scalability. Optimizations like efficient session storage mechanisms, caching, and load balancing can help mitigate these concerns.
+- **Not mobile-friendly:** While cookies work well on mobile devices, certain mobile platforms or browser settings may have limitations or different behaviors regarding cookie handling. It’s important to ensure compatibility and consider alternative approaches if necessary, such as using device-specific storage mechanisms or adapting the session management strategy for mobile environments.
+### Use Cases
+- General medium to large-scale websites (except for mobile apps): Session-cookies are a good choice for general medium to large-scale websites that do not require mobile-friendliness.
+- Servers with limited budgets: Session-cookies can be a cost-effective option for servers with limited budgets, as they do not require dedicated memory servers.
+
