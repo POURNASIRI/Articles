@@ -323,3 +323,24 @@ HMACSHA256(
    base64UrlEncode(payload),
    secret)
 ```
+### How to use JWT
+The client receives the JWT provided by the server, which can be stored in either the Cookie or the localStorage. Whenever the client interacts with the server, it must include this JWT. While it can be automatically sent through cookies, this approach has limitations when it comes to cross-domain communication. Therefore, it is preferable to include the JWT in the Authorization field of the HTTP request header.
+
+```js
+ Authorization: Bearer <token>
+ ```
+###JWT Authentication Flowchart
+The authentication process of JWT is similar to that of Tokens, but with the advantage that there is no need to perform separate database queries to retrieve user information. The technical steps involved in JWT authentication are as follows:
+
+![alt text](image-6.png)
+
+#### **Advantages of JWT:**
+
+- **Stateless:** JWTs adhere to the principles of statelessness in RESTful APIs, eliminating the need to store session information on the server side. This allows for easy scalability and extension of the application, as there is no reliance on server-side session storage.
+- **Efficient Information Exchange:** The payload in JWT can store commonly used information, reducing the need for the server to query the database repeatedly. By including necessary data in the JWT payload, the number of database queries can be minimized, resulting in improved performance and efficiency.
+
+
+#### **Disadvantages of JWT:**
+
+- **Encryption concerns:** JWTs are not encrypted by default, which means the token payload can be read by anyone who has access to it. However, the token itself can be encrypted using additional measures such as encrypting the token payload or using encrypted communication channels.
+- **Expiration challenge:** JWTs have an expiration time set when they are issued. Once a JWT is issued, its validity cannot be changed or revoked. If additional logic is not implemented on the server side, a JWT will remain valid until it expires, even if there is a need to revoke or modify permissions associated with the token.
