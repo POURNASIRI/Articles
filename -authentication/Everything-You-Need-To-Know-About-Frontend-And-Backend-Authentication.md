@@ -262,3 +262,64 @@ Refresh Token authentication steps analysis:
 - **Storage Locations:** Sessions are typically stored on the server, while Tokens are stateless and are usually stored on the client side.
 - **Security Levels:** Sessions and Tokens are not mutually exclusive. However, as an authentication mechanism, Tokens offer enhanced security compared to Sessions. Each request is signed, which prevents eavesdropping and replay attacks.
 - **Support Levels:** Session-Cookie authentication relies on the browser’s cookie mechanism. However, this mechanism may not function properly in native mobile apps or if the browser’s cookie storage functionality is disabled. On the other hand, Token authentication provides broader support for different client types.
+
+
+## 4. JWT (JSON Web Token) Authentication
+In the previous section, you learned about the usage and composition of Tokens. It becomes apparent that when the server validates the Token sent by the client, it needs to query the database to retrieve user information and verify the Token’s validity. This process of querying the database for each authentication request introduces delays and performance overhead.
+
+To address this issue, the industry commonly uses JWT.
+
+
+## What is JWT?
+JWT is a solution proposed by Auth0 for authorization and authentication by encrypting and signing JSON data. After a successful login, relevant user information is assembled into a JSON object, which is then encrypted in a specific manner and returned to the client. The client subsequently includes this Token in the next request.
+
+When the server receives the request, it validates the legality of the Token, verifying its legitimacy.
+
+
+## Components of JWT
+JWT consists of three parts; header, payload, and signature
+
+It is a long string separated into three parts by dots. For example:
+
+#### Header:
+
+There are usually two parts in the Header:
+
+- **typ**: represents the type of Token, here is the JWT type.
+- **alg**: Hash algorithm used, such as HMAC SHA256 or RSA.
+
+```js
+ {
+   "alg": "HS256",
+   "typ": "JWT"
+ }
+ ```
+
+#### Payload:
+It contains claims, which are descriptions of entities, including user information and other metadata. These claims are used to store the actual data that needs to be transmitted. JWT defines seven official fields:
+
+- iss (issuer): The issuer of the token.
+- exp (expiration time): The expiration time of the token.
+- sub (subject): The subject of the token.
+- aud (audience): The intended audience of the token.
+- nbf (Not Before): The time before which the token is not valid.
+- iat (Issued At): The time at which the token was issued.
+- jti (JWT ID): The unique identifier of the token.
+- In addition to the official fields, you can also define private fields in this section. Below is an example.
+```js
+ {
+   "sub": "1234567890",
+   "name": "John Doe",
+   "admin": true
+ }
+ ```
+#### Signature:
+
+The Signature component is used to sign the previous two components, preventing data tampering. Firstly, a secret key needs to be specified. This key is known only to the server and should not be disclosed to users. Then, the specified signature algorithm from the Header (default is HMAC SHA256) is used to generate the signature according to the following formula.
+
+```ja
+HMACSHA256(
+   base64UrlEncode(header) + "." +
+   base64UrlEncode(payload),
+   secret)
+```
