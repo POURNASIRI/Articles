@@ -344,3 +344,62 @@ The authentication process of JWT is similar to that of Tokens, but with the adv
 
 - **Encryption concerns:** JWTs are not encrypted by default, which means the token payload can be read by anyone who has access to it. However, the token itself can be encrypted using additional measures such as encrypting the token payload or using encrypted communication channels.
 - **Expiration challenge:** JWTs have an expiration time set when they are issued. Once a JWT is issued, its validity cannot be changed or revoked. If additional logic is not implemented on the server side, a JWT will remain valid until it expires, even if there is a need to revoke or modify permissions associated with the token.
+
+
+
+## 5. Single Sign On
+In the previous sections, you have learned that in a client/serversystem within the same domain, a login state can be maintained for a certain period of time by the client carrying credentials. However, as enterprises grow, a large system may consist of numerous subsystems, and users may need to log in multiple times when interacting with different systems. This can be inconvenient.
+
+`Single Sign-On` `(SSO)` provides a solution to this problem, allowing you to authenticate once and access multiple applications within the same domain without needing to log in again for each application.
+
+***Single Sign-On (SSO) provides a solution to this problem, allowing you to authenticate once and access multiple applications within the same domain without needing to log in again for each application.***
+
+
+### SSO within the Same Domain
+When there are two subsystems under the same domain in the Google website, such as the mail subsystem (mail.google.com) and the cloud subsystem (cloud.google.com), the following steps are taken to implement SSO:
+
+- `Client:` When a user accesses a particular subsystem (for example mail.google.com) without being logged in, they are redirected to the login page provided by the SSO authentication center for authentication.
+- `Server:` After successful authentication, the server stores the login user’s information in the session and attaches it to the response header’s Set-Cookie field, setting the cookie’s Domain attribute as “.google.com” to make it accessible across all subdomains.
+- `Client:` When making subsequent requests, the client includes the cookie with the main domain’s domain attribute in the request headers. This allows the server to verify the login status by checking the received cookie against the stored session information. If the cookie is valid, the user is considered authenticated and granted access to the requested subsystem
+
+
+***This SSO mechanism enables users to authenticate once and seamlessly access multiple trusted applications within the same domain, enhancing convenience and user experience.***
+
+
+### SSO (Single Sign-On) in Cross-Origin (Different Main Domains)
+In popular websites like Gmail and Google Cloud, when we log in to one system, the other system automatically logs in as well. How is this achieved? This is made possible through `CAS ``(Central Authentication Service),` a central authorization service. Let’s primarily discuss the process of CAS.
+
+![alt text](image-7.png)
+
+
+A detailed explanation of CAS authentication steps under single sign-on:
+- `Client:` Starts accessing System A.
+- `System A:` Detects that the user is not logged in and redirects to the CAS authentication service (sso.com). The URL parameters carry the link to redirect back to System A after successful login (sso.com/login?redir…).
+CAS Authentication Service: Finds that the request’s cookie does not contain the ticket-granting credential (TGC) for login. Therefore, the CAS authentication service determines that the user is in a “not logged in” state and redirects the user to the CAS login page. The user performs the login operation on the CAS login page.
+- `Client:` Enters username and password for CAS system authentication.
+CAS Authentication Service: Validates the user information and generates a TGC, which is stored in its own session. The TGC is also set as a cookie under the domain “sso.com”. Additionally, the CAS service generates an authorization token called Service Ticket (ST) and redirects to the address of System A. The redirect URL includes the generated ST (redirect address: www.abc.com?token=ST-345678).
+- `System A:` Takes the ST and sends a request to the CAS authentication service to verify the validity of the ticket (ST). After successful verification, System A knows that the user has logged in through CAS (the ST can be saved in a cookie or locally). The System A server uses this ticket (ST) to create a session with the user, known as a local session, and returns the protected resource.
+- `Client:` Begins accessing System B.
+System B: Detects that the user is not logged in and redirects them to the SSO authentication service, passing its own address as a parameter and including the TGC generated in step five as a cookie value under the sso.com domain.
+CAS Authentication Service: The CAS authentication service center recognizes that the user is already logged in and redirects them back to the address of System B, attaching a ticket (ST).
+- `System B:` Receives the ticket (ST) and verifies its validity by checking with the CAS authentication service. Upon successful validation, the client can now interact with System B.
+
+#### Points to note under single sign-on:
+
+As shown in the diagram, you can see that after the CAS authentication service issues the authorization token ST, it directly redirects, which makes it relatively easy to be stolen. Therefore, in System A or System B, after successful CAS verification (as shown in steps 14 and 11 in the diagram), we need to generate another new validation token and return it to the client for storage.\
+
+
+### CAS generally provides four interfaces:
+
+- `/login:` The login interface is used to log in to the central authorization service.
+- `/logout:` The logout interface is used to log out from the central authorization service.
+- `/validate:` Used to verify if the user is logged in to the central authorization service.
+- `/serviceValidate:` Used by various services to verify if the user is logged in to the central authorization service.
+
+
+
+#### CAS-generated tickets:
+
+- `TGT (Ticket Granting Ticket):` TGT is the login ticket issued by CAS to the user. With the TGT, the user can prove that they have successfully logged in to CAS.
+- `TGC (Ticket Granting Cookie):` CAS Server generates the TGT and stores it in its own session. The TGC is the unique identifier (SessionId) of this session, which is sent to the browser as a cookie. It serves as the credential for CAS Server to identify the user.
+- `ST (Service Ticket):` ST is the ticket issued by CAS to the user for accessing a specific service
